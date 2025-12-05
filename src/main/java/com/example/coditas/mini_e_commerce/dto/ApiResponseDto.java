@@ -1,0 +1,56 @@
+package com.example.coditas.mini_e_commerce.dto;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+
+import java.util.Map;
+
+@Data
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ApiResponseDto<T> {
+
+    private boolean success;
+    private String message;
+    private T data;
+    private Map<String, Object> meta;
+
+
+    public static <T> ApiResponseDto<T> ok(T data) {
+        return ApiResponseDto.<T>builder()
+                .success(true)
+                .message("Success")
+                .data(data)
+                .build();
+    }
+
+    public static <T> ApiResponseDto<T> ok(T data, String message) {
+        return ApiResponseDto.<T>builder()
+                .success(true)
+                .message(message)
+                .data(data)
+                .build();
+    }
+
+    public static <T> ApiResponseDto<T> paged(T data, int page, int size, long total) {
+        return ApiResponseDto.<T>builder()
+                .success(true)
+                .message("Success")
+                .data(data)
+                .meta(Map.of(
+                        "page", page,
+                        "size", size,
+                        "totalElements", total,
+                        "totalPages", (int) Math.ceil((double) total / size)
+                ))
+                .build();
+    }
+
+    public static <T> ApiResponseDto<T> error(String message) {
+        return ApiResponseDto.<T>builder()
+                .success(false)
+                .message(message)
+                .build();
+    }
+
+}
