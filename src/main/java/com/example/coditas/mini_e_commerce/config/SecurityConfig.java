@@ -43,9 +43,24 @@ public class SecurityConfig {
 
                         // secured endpoints
                         .requestMatchers(HttpMethod.POST,"/api/v1/products").hasRole("VENDOR")
-                        .requestMatchers(HttpMethod.GET,"/api/v1/products/**").hasAnyRole("CUSTOMER", "VENDOR", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/products/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH,"/api/v1/products").hasRole("VENDOR")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/products").hasAnyRole( "VENDOR", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/v1/products")
+                        .hasAnyRole( "VENDOR", "ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/search").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").permitAll()
+
+                        .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
+
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/orders", "/api/v1/orders/**")
+                        .hasAnyRole("CUSTOMER", "VENDOR", "ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/**")
+                        .hasAnyRole("VENDOR", "ADMIN")
 
                         // any other request must be authenticated
                         .anyRequest().authenticated()

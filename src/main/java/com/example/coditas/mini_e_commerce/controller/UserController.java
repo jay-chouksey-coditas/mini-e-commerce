@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    UserService userService;
+    private final UserService userService;
 
     @PatchMapping("/{userId}")
     public ResponseEntity<ApiResponseDto<UserResponseDto>> updateUser(
@@ -28,7 +28,7 @@ public class UserController {
 
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponseDto<String>> softDeleteUser(
-            @PathVariable String userId) {  // assuming you have auth
+            @PathVariable String userId) {
 
         String data = userService.softDeleteUser(userId);
         ApiResponseDto<String> responseBody = ApiResponseDto.ok(data, "Success");
@@ -37,11 +37,22 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponseDto<Page<UserResponseDto>>> getEmployees(
+    public ResponseEntity<ApiResponseDto<Page<UserResponseDto>>> getUsers(
             @ModelAttribute GenericFilterDto filter,
             @ModelAttribute PageableDto page) {
 
         Page<UserResponseDto> data = userService.searchUsers(filter, page);
+        return ResponseEntity.ok(ApiResponseDto.paged(
+                data, page.getPage(), page.getSize(), data.getTotalElements()
+        ));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponseDto<Page<UserResponseDto>>> globalSearch(
+            @RequestParam String q,
+            @ModelAttribute PageableDto page) {
+
+        Page<UserResponseDto> data = userService.globalSearch(q, page);
         return ResponseEntity.ok(ApiResponseDto.paged(
                 data, page.getPage(), page.getSize(), data.getTotalElements()
         ));

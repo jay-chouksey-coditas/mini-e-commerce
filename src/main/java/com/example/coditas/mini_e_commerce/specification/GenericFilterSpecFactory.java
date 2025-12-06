@@ -1,6 +1,7 @@
 package com.example.coditas.mini_e_commerce.specification;
 
 import com.example.coditas.mini_e_commerce.dto.GenericFilterDto;
+import com.example.coditas.mini_e_commerce.entity.Order;
 import com.example.coditas.mini_e_commerce.entity.Product;
 import com.example.coditas.mini_e_commerce.entity.User;
 import jakarta.persistence.criteria.Join;
@@ -34,9 +35,26 @@ public class GenericFilterSpecFactory {
     // USER
     public static Specification<User> forUser(GenericFilterDto filter) {
         return GenericSpecificationBuilder.<User>builder()
+                .add(enumEqual("role", EnumHelper.toRole(filter.getRole())))
                 .add(enumEqual(IS_ACTIVE, EnumHelper.toActiveStatus(filter.getStatus())))
                 .build();
     }
+
+    // ORDER
+    public static Specification<Order> forOrder(User currentUser, GenericFilterDto filter) {
+        return GenericSpecificationBuilder.<Order>builder()
+
+                .add(enumEqual("status", EnumHelper.toOrderStatus(filter.getStatus()))) // e.g. ?status=PENDING
+                .add(greaterThanEqual("totalPrice", filter.getMinPrice()))
+                .add(lessThanEqual("totalPrice", filter.getMaxPrice()))
+                .add(between("createdAt", filter.getStartDate(), filter.getEndDate())) // ?startDate=2025-01-01&endDate=2025-01-31
+
+                // Global search on orderId
+                .add(globalSearch(filter.getName(), "orderId"))
+
+                .build();
+    }
+
 
     // GLOBAL SEARCH
     public static <T> Specification<T> globalSearch(GenericFilterDto filter, String... fields) {

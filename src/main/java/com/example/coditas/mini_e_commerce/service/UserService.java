@@ -44,17 +44,17 @@ public class UserService {
         String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new CustomException("User not found", HttpStatus.NOT_FOUND));
-        boolean isSelf = currentUser.getUserId().equals(userId);
 
-        if (!isSelf) {
+        boolean isSelf = currentUser.getUserId().equals(userId);
+        boolean isAdmin = currentUser.getRole().equals(UserRole.ADMIN);
+
+        if (!isSelf && !isAdmin) {
             throw new CustomException("You can only update your own profile", HttpStatus.FORBIDDEN);
         }
 
         if (dto.getName() != null && !dto.getName().trim().isBlank()) {
             user.setName(dto.getName().trim());
         }
-
-        boolean isAdmin = currentUser.getRole().equals(UserRole.ADMIN);
 
         if(dto.getRole() != null && !dto.getRole().trim().isBlank() && isAdmin){
             user.setRole(UserRole.valueOf(dto.getRole().toUpperCase()));
